@@ -18,4 +18,5 @@ EXPOSE 2100
 
 # Command to run the Flask app
 #CMD ["python", "main.py"]
-CMD ["waitress-serve", "--listen=0.0.0.0:2100", "main:app"]
+#./.venv/bin/gunicorn -k eventlet -w 1 --bind 0.0.0.0:2100 --log-level info main:app --reload
+CMD ["gunicorn", "-k", "eventlet", "-w", "1", "--bind", "0.0.0.0:2100", "--log-level", "info", "main:app", "--reload"]
