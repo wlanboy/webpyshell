@@ -79,4 +79,4 @@ def read_output():
 
 if __name__ == '__main__':
     socketio.start_background_task(target=read_output)
-    socketio.run(app, port=2100, host=0.0.0.0, debug=True)
+    socketio.run(app, port=2100, host="0.0.0.0", debug=True)
