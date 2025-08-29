@@ -5,8 +5,18 @@ from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 import pty
 import subprocess
+import logging
 
 app = Flask(__name__)
+
+# Use gunicorn's logger if running under gunicorn
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+else:
+    logging.basicConfig(level=logging.INFO)
+
 # Generate a random SECRET_KEY for each run
 app.config['SECRET_KEY'] = secrets.token_urlsafe(16)
 socketio = SocketIO(app)
@@ -18,8 +28,8 @@ terminals = {}
 root_password = secrets.token_urlsafe(16)
 root_password_hash = generate_password_hash(root_password)
 
-print(f"root password for login is: {root_password}")
-print(f"SECRET_KEY for this session is: {app.config['SECRET_KEY']}")
+app.logger.info(f"root password for login is: {root_password}")
+app.logger.info(f"SECRET_KEY for this session is: {app.config['SECRET_KEY']}")
 
 @app.route('/')
 def index():
@@ -78,5 +88,5 @@ def read_output():
                     del terminals[sid]
 
 if __name__ == '__main__':
-    socketio.start_background_task(target=read_output)
-    socketio.run(app, port=2100, host="0.0.0.0", debug=True)
+    #socketio.start_background_task(target=read_output)
+    socketio.run(app, debug=True)
