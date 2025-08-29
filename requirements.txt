@@ -29,6 +29,8 @@ python-socketio==5.13.0
     # via flask-socketio
 simple-websocket==1.1.0
     # via python-engineio
+waitress==3.0.2
+    # via webpyshell (pyproject.toml)
 werkzeug==3.1.3
     # via flask
 wsproto==1.2.0

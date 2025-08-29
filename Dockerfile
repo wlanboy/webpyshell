@@ -15,4 +15,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 2100
 
 # Command to run the Flask app
-CMD ["python", "main.py"]
+#CMD ["python", "main.py"]
+CMD ["waitress-serve", "--listen=0.0.0.0:2100", "main:app"]
