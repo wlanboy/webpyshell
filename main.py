@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import pty
 import subprocess
 import logging
+import gevent
 
 app = Flask(__name__)
 
@@ -19,7 +20,7 @@ else:
 
 # Generate a random SECRET_KEY for each run
 app.config['SECRET_KEY'] = secrets.token_urlsafe(16)
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='gevent')
 
 # Session management for terminals
 terminals = {}
@@ -77,7 +78,7 @@ def handle_disconnect():
 
 def read_output():
     while True:
-        socketio.sleep(0.01)
+        gevent.sleep(0.01)
         for sid, fd in list(terminals.items()):
             try:
                 output = os.read(fd, 4096).decode()
@@ -88,5 +89,5 @@ def read_output():
                     del terminals[sid]
 
 if __name__ == '__main__':
-    #socketio.start_background_task(target=read_output)
+    gevent.spawn(read_output)
     socketio.run(app, debug=True)

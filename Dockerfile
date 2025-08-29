@@ -18,5 +18,5 @@ EXPOSE 2100
 
 # Command to run the Flask app
 #CMD ["python", "main.py"]
-#./.venv/bin/gunicorn -k eventlet -w 1 --bind 0.0.0.0:2100 --log-level info main:app --reload
-CMD ["gunicorn", "-k", "eventlet", "-w", "1", "--bind", "0.0.0.0:2100", "--log-level", "info", "main:app", "--reload"]
+#./.venv/bin/gunicorn -k gevent -w 1 --bind 0.0.0.0:2100 --log-level info main:app --reload
+CMD ["gunicorn", "-k", "gevent", "-w", "1", "--bind", "0.0.0.0:2100", "--log-level", "info", "main:app", "--reload"]
