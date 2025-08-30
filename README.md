@@ -26,7 +26,7 @@ docker build -t webpyshell .
 
 ## run local
 ```
-docker run -p 2100:2100 webpyshell
+docker run --name webshell -d -p 2100:2100 wlanboy/webpyshell
 ```
 
 ## publish
