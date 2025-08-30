@@ -1,93 +1,31 @@
-import os
-import secrets
-from flask import Flask, render_template, request, session, redirect, url_for
-from flask_socketio import SocketIO, emit
-from werkzeug.security import generate_password_hash, check_password_hash
-import pty
+from flask import Flask, render_template, request
 import subprocess
-import logging
-import gevent
 
 app = Flask(__name__)
 
-# Use gunicorn's logger if running under gunicorn
-if __name__ != '__main__':
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
-else:
-    logging.basicConfig(level=logging.INFO)
-
-# Generate a random SECRET_KEY for each run
-app.config['SECRET_KEY'] = secrets.token_urlsafe(16)
-socketio = SocketIO(app, async_mode='gevent')
-
-# Session management for terminals
-terminals = {}
-
-# Random password for login
-root_password = secrets.token_urlsafe(16)
-root_password_hash = generate_password_hash(root_password)
-
-app.logger.info(f"root password for login is: {root_password}")
-app.logger.info(f"SECRET_KEY for this session is: {app.config['SECRET_KEY']}")
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    if 'logged_in' not in session or not session.get('password_hash') or not check_password_hash(session.get('password_hash'), root_password):
-        return redirect(url_for('login'))
-    return render_template('index.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+    output = None
+    command = ''
     if request.method == 'POST':
-        password = request.form.get('password')
-        if check_password_hash(root_password_hash, password):
-            session['logged_in'] = True
-            session['password_hash'] = root_password_hash
-            return redirect(url_for('index'))
-        else:
-            return 'Invalid password', 401
-    return render_template('login.html')
-
-@socketio.on('connect')
-def handle_connect():
-    if 'logged_in' not in session or not session.get('password_hash') or not check_password_hash(session.get('password_hash'), root_password):
-        return False  # Reject connection
-
-@socketio.on('create_terminal')
-def create_terminal_session():
-    pid, fd = pty.fork()
-    if pid == 0:
-        subprocess.run(['bash'])
-        os._exit(0)
-    else:
-        terminals[request.sid] = fd
-        emit('terminal_created')
-
-@socketio.on('terminal_input')
-def handle_terminal_input(data):
-    if request.sid in terminals:
-        os.write(terminals[request.sid], data['input'].encode())
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    if request.sid in terminals:
-        os.close(terminals[request.sid])
-        del terminals[request.sid]
-
-def read_output():
-    while True:
-        gevent.sleep(0.01)
-        for sid, fd in list(terminals.items()):
+        command = request.form.get('command')
+        if command:
             try:
-                output = os.read(fd, 4096).decode()
-                if output:
-                    socketio.emit('terminal_output', {'output': output}, room=sid)
-            except OSError:
-                if sid in terminals:
-                    del terminals[sid]
+                result = subprocess.run(
+                    command,
+                    shell=True,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    encoding='utf-8'
+                )
+                output = result.stdout + result.stderr
+            except subprocess.CalledProcessError as e:
+                output = f"Fehler bei der Ausführung:\n{e.stdout}\n{e.stderr}"
+            except Exception as e:
+                output = f"Ein Fehler ist aufgetreten: {str(e)}"
+
+    return render_template('index.html', output=output, command=command)
 
 if __name__ == '__main__':
-    gevent.spawn(read_output)
-    socketio.run(app, debug=True)
+    app.run(debug=True)
