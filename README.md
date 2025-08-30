@@ -28,6 +28,15 @@ docker build -t webpyshell .
 ```
 docker run --name webshell -d -p 2100:2100 wlanboy/webpyshell
 ```
+* see logfile for access key
+* Log output:
+```
+[2025-08-30 18:00:43 +0000] [1898413] [INFO] Starting gunicorn 23.0.0
+[2025-08-30 18:00:43 +0000] [1898413] [INFO] Listening at: http://0.0.0.0:2100 (1898413)
+[2025-08-30 18:00:43 +0000] [1898413] [INFO] Using worker: sync
+[2025-08-30 18:00:43 +0000] [1898414] [INFO] Booting worker with pid: 1898414
+[2025-08-30 18:00:43 +0000] [1898414] [INFO] Access Key: xxxxxxxxxxxxxxx
+```
 
 ## publish
 ```
