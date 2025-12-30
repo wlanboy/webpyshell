@@ -1,67 +1,15 @@
 body {
-    background-color: #121212;
+    background: #1e1e1e;
     color: #e0e0e0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Fira Code", monospace;
     margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+    padding: 0;
 }
 
 .container {
-    background-color: #1e1e1e;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    width: 100%;
-    max-width: 800px;
-}
-
-h1 {
-    color: #4CAF50;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-form {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-input[type="text"] {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #333;
-    background-color: #2c2c2c;
-    color: #fff;
-    border-radius: 4px;
-}
-
-button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-.output-box {
-    background-color: #2c2c2c;
-    border: 1px solid #333;
-    padding: 15px;
-    border-radius: 4px;
-    white-space: pre-wrap;
-    overflow-x: auto;
-    max-height: 500px;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
 }
 
 .header {
@@ -71,21 +19,63 @@ button:hover {
     margin-bottom: 20px;
 }
 
+h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
 .logout-btn {
-    background-color: #f44336;
-    color: white;
-    padding: 8px 16px;
+    color: #fff;
+    background: #c62828;
+    padding: 8px 14px;
+    border-radius: 6px;
     text-decoration: none;
-    border-radius: 4px;
+}
+
+form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    background: #2b2b2b;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+}
+
+button {
+    padding: 10px 20px;
+    background: #007acc;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #005fa3;
+}
+
+.output-box {
+    background: #111;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
     font-size: 14px;
+    line-height: 1.4;
 }
 
-.logout-btn:hover {
-    background-color: #d32f2f;
+.output-line-error {
+    color: #ff6b6b;
 }
 
-.error {
-    color: #ff5252;
-    text-align: center;
-    margin-top: 10px;
+.output-line-ok {
+    color: #a8ff60;
 }

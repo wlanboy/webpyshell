@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,23 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>Terminal</h1>
             <a href="{{ url_for('logout') }}" class="logout-btn">Abmelden</a>
         </div>
-        <form method="POST">
-            <input type="text" name="command" value="{{ command }}" placeholder="Befehl eingeben (z. B. ls -la)">
-            <button type="submit">Ausführen</button>
+        <form id="cmdForm">
+            <input type="text" id="cmd" name="command" placeholder="Befehl eingeben (z. B. ls -la)">
+            <button id="runBtn" type="submit">Ausführen</button>
         </form>
-        {% if output is not none %}
-        <pre class="output-box">{{ output }}</pre>
-        {% endif %}
+
+        <pre id="output" class="output-box"></pre>
+
+        <script src="{{ url_for('static', filename='stream.js') }}"></script>
+
     </div>
 </body>
+
 </html>
