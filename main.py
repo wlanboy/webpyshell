@@ -1,9 +1,29 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, Response
 import subprocess
 import logging
 import secrets
 
 app = Flask(__name__)
+
+SAFE_BUSYBOX_COMMANDS = {
+    "ls", "cat", "echo", "head", "tail", "grep", "fgrep", "egrep",
+    "awk", "sed", "cut", "sort", "uniq", "wc", "xxd", "base64",
+    "date", "cal", "pwd", "printf", "true", "false", "sleep",
+    "time", "uptime", "whoami", "which", "test", "expr",
+    "dirname", "basename", "rev", "fold", "strings", "stat",
+    "arping",
+    "nc",
+    "nslookup",
+    "ping",
+    "wget",
+    "curl",
+    "traceroute",
+    "traceroute6",
+    "ssl_client",
+    "hostname",
+    "dnsdomainname"
+}
+
 
 # Use gunicorn's logger if running under gunicorn
 if __name__ != '__main__':
@@ -43,29 +63,67 @@ def logout():
     session.pop('key_ok', None)
     return redirect(url_for('login'))
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    output = None
-    command = ''
-    if request.method == 'POST':
-        command = request.form.get('command')
-        if command:
-            try:
-                result = subprocess.run(
-                    command,
-                    shell=True,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    encoding='utf-8'
-                )
-                output = result.stdout + result.stderr
-            except subprocess.CalledProcessError as e:
-                output = f"Fehler bei der Ausführung:\n{e.stdout}\n{e.stderr}"
-            except Exception as e:
-                output = f"Ein Fehler ist aufgetreten: {str(e)}"
+    return render_template('index.html')
 
-    return render_template('index.html', output=output, command=command)
+@app.route('/stream')
+def stream():
+    command = request.args.get('command', '').strip()
+
+    # 1. Hilfe anzeigen
+    if command == "?":
+        def helpgen():
+            yield "data: Verfügbare Befehle:\n\n"
+            for cmd in sorted(SAFE_BUSYBOX_COMMANDS):
+                yield f"data:   {cmd}\n\n"
+            yield "data: [END]\n\n"
+        return Response(helpgen(), mimetype='text/event-stream')
+
+    # 2. Leere Eingaben blockieren
+    if not command:
+        def deny():
+            yield "data: ERROR: Kein Befehl.\n\n"
+            yield "data: [END]\n\n"
+        return Response(deny(), mimetype='text/event-stream')
+
+    # 3. sudo blockieren
+    if "sudo" in command.split():
+        def deny():
+            yield "data: ERROR: sudo ist nicht erlaubt.\n\n"
+            yield "data: [END]\n\n"
+        return Response(deny(), mimetype='text/event-stream')
+
+    # 4. Whitelist prüfen
+    cmd_name = command.split()[0]
+    if cmd_name not in SAFE_BUSYBOX_COMMANDS:
+        def deny():
+            yield f"data: ERROR: '{cmd_name}' ist nicht erlaubt.\n\n"
+            yield "data: [END]\n\n"
+        return Response(deny(), mimetype='text/event-stream')
+
+    # 5. BusyBox ausführen
+    def generate():
+        try:
+            process = subprocess.Popen(
+                ["busybox", "sh", "-c", command],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
+
+            for line in process.stdout:
+                yield f"data: {line.rstrip()}\n\n"
+
+            process.wait()
+
+        except Exception as e:
+            yield f"data: ERROR: {str(e)}\n\n"
+
+        yield "data: [END]\n\n"
+
+    return Response(generate(), mimetype='text/event-stream')
 
 if __name__ == '__main__':
     app.run(debug=True)
