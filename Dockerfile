@@ -1,6 +1,8 @@
 # Use the official Python image as the base
 FROM python:3.12-slim
 
+RUN apt-get update && \ apt-get install -y busybox && \ busybox --install -s
+
 # Set the working directory in the container
 WORKDIR /app
 
