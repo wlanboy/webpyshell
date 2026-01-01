@@ -38,13 +38,6 @@ docker run --name webshell -d -p 2100:2100 wlanboy/webpyshell
 [2025-08-30 18:00:43 +0000] [1898414] [INFO] Access Key: xxxxxxxxxxxxxxx
 ```
 
-## publish
-```
-docker login
-docker tag webpyshell wlanboy/webpyshell:latest
-docker push wlanboy/webpyshell:latest
-```
-
 ## run
 ```
 docker run -d -p 2100:2100 wlanboy/webpyshell
