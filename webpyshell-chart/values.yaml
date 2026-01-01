@@ -1,0 +1,43 @@
+image:
+  repository: wlanboy/webpyshell
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+deploymentName: webpyshell
+
+service:
+  name: webpyshell-svc
+  type: ClusterIP
+  port: 2100
+  targetPort: 2100
+
+pvc:
+  enabled: true
+  name: webpyshell-tmp-pvc
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  size: "100Mi"
+
+volume:
+  mountPath: /tmp
+
+istio:
+  gatewayName: webpyshell-gw
+  gatewayNamespace: "istio-ingress"
+  hosts: 
+    - webpyshell.tp.lan
+    - webpyshell.gmk.lan
+  tls:
+    enabled: true
+    secretName: webpyshell-tls
+
+certManager:
+  enabled: true
+  issuerRef:
+    kind: ClusterIssuer
+    name: "local-ca-issuer"
+  dnsNames:
+    - webpyshell.tp.lan
+    - webpyshell.gmk.lan
